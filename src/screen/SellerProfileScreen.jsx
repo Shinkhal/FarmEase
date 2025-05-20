@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet, Alert, TouchableOpacity, ScrollView } from 'react-native';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  Alert, 
+  TouchableOpacity, 
+  ScrollView, 
+  ActivityIndicator,
+  Image 
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -20,7 +29,6 @@ const SellerProfileScreen = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-
   const handleGoBack = () => {
     navigation.goBack();
   };
@@ -28,17 +36,15 @@ const SellerProfileScreen = () => {
   // Function to fetch profile data from API
   const fetchProfileData = async (email) => {
     try {
-      // Replace with your actual API URL and pass email in the query params or request body
-      const response = await fetch(`http://13.200.59.120:5000/api/auth/profile/${email}`,{
+      const response = await fetch(`http://192.168.29.146:5000/api/auth/profile/${email}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
         }
-    }); 
+      }); 
 
       const data = await response.json();
       
-      // Assuming the API response is structured like { name: 'John Doe', email: 'john@example.com', phone: '1234567890' }
       setProfileData({
         name: data.name,
         email: data.email,
@@ -102,116 +108,302 @@ const SellerProfileScreen = () => {
       ]
     );
   };
-  
 
+  const handleEditProfile = () => {
+    // Navigate to edit profile screen
+    // navigation.navigate('EditProfile', { profileData });
+    Alert.alert("Edit Profile", "Edit profile functionality coming soon!");
+  };
+  
   if (loading) {
-    return <Text>Loading...</Text>;
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={styles.loadingText}>Loading profile...</Text>
+      </View>
+    );
   }
 
   if (error) {
-    return <Text>{error}</Text>;
+    return (
+      <View style={styles.errorContainer}>
+        <Ionicons name="alert-circle-outline" size={60} color={colors.error} />
+        <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity 
+          style={styles.retryButton}
+          onPress={() => {
+            setLoading(true);
+            getEmailAndFetchProfile();
+          }}
+        >
+          <Text style={styles.retryButtonText}>Retry</Text>
+        </TouchableOpacity>
+      </View>
+    );
   }
 
   return (
-    <>
     <View style={styles.container}>
-        <ScrollView style={styles.content}>
-            <TouchableOpacity style={styles.backButtonWrapper} onPress={handleGoBack}>
-                <Ionicons name={"arrow-back-outline"} color={colors.primary} size={25} />
-            </TouchableOpacity>
-            <Text style={styles.header}>Seller Profile</Text>
-            <View style={styles.profileBox}>
-                <Text style={styles.label}>Name:</Text>
-                <Text style={styles.value}>{profileData.name}</Text>
-
-                <Text style={styles.label}>Email:</Text>
-                <Text style={styles.value}>{profileData.email}</Text>
-
-                <Text style={styles.label}>Phone Number:</Text>
-                <Text style={styles.value}>{profileData.phone}</Text>
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
+          <Ionicons name="arrow-back" size={24} color={colors.white} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>My Profile</Text>
+        <TouchableOpacity style={styles.editButton} onPress={handleEditProfile}>
+          <Ionicons name="create-outline" size={24} color={colors.white} />
+        </TouchableOpacity>
+      </View>
+      
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.contentContainer}>
+        <View style={styles.profileImageContainer}>
+          <View style={styles.profileImage}>
+            <Text style={styles.profileInitial}>{profileData.name.charAt(0).toUpperCase()}</Text>
+          </View>
+          <Text style={styles.profileName}>{profileData.name}</Text>
+          <Text style={styles.sellerTag}>Verified Seller</Text>
+        </View>
+        
+        <View style={styles.infoSection}>
+          <Text style={styles.sectionTitle}>Account Information</Text>
+          
+          <View style={styles.infoItem}>
+            <View style={styles.iconContainer}>
+              <Ionicons name="mail-outline" size={22} color={colors.primary} />
             </View>
-            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                <Text style={styles.logoutText}>Logout</Text>
-            </TouchableOpacity>
-        </ScrollView>
-        <FarmerFooter />
+            <View style={styles.infoContent}>
+              <Text style={styles.infoLabel}>Email</Text>
+              <Text style={styles.infoValue}>{profileData.email}</Text>
+            </View>
+          </View>
+          
+          <View style={styles.infoItem}>
+            <View style={styles.iconContainer}>
+              <Ionicons name="call-outline" size={22} color={colors.primary} />
+            </View>
+            <View style={styles.infoContent}>
+              <Text style={styles.infoLabel}>Phone</Text>
+              <Text style={styles.infoValue}>{profileData.phone}</Text>
+            </View>
+          </View>
+        </View>
+        
+        <View style={styles.actionsSection}>
+          <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('SellerProducts')}>
+            <Ionicons name="leaf-outline" size={22} color={colors.primary} />
+            <Text style={styles.actionText}>My Products</Text>
+            <Ionicons name="chevron-forward" size={22} color={colors.text} />
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('SellerOrders')}>
+            <Ionicons name="cart-outline" size={22} color={colors.primary} />
+            <Text style={styles.actionText}>My Orders</Text>
+            <Ionicons name="chevron-forward" size={22} color={colors.text} />
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('Settings')}>
+            <Ionicons name="settings-outline" size={22} color={colors.primary} />
+            <Text style={styles.actionText}>Settings</Text>
+            <Ionicons name="chevron-forward" size={22} color={colors.text} />
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('Help')}>
+            <Ionicons name="help-circle-outline" size={22} color={colors.primary} />
+            <Text style={styles.actionText}>Help & Support</Text>
+            <Ionicons name="chevron-forward" size={22} color={colors.text} />
+          </TouchableOpacity>
+        </View>
+        
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Ionicons name="log-out-outline" size={22} color={colors.white} />
+          <Text style={styles.logoutButtonText}>Logout</Text>
+        </TouchableOpacity>
+      </ScrollView>
+      
+      <FarmerFooter />
     </View>
-    </>
-);
+  );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.jade,
-        padding: 20,
-        marginTop: 20
-    },
-    content: {
-        padding: 20,
-        backgroundColor: colors.gray,
-        borderRadius: 10,
-        shadowColor: colors.jade,
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-    },
-    header: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
-        color: colors.primary
-    },
-    profileBox: {
-        backgroundColor: colors.white, // Background color for the box
-        borderRadius: 10, // Rounded corners
-        padding: 15, // Padding inside the box
-        marginBottom: 20, // Space below the box
-        shadowColor: '#000', // Shadow color
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.3, // Shadow opacity
-        shadowRadius: 4, // Shadow blur radius
-        elevation: 5, // For Android shadow effect
-    },
-    label: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: colors.softforest
-    },
-    value: {
-        fontSize: 16,
-        marginBottom: 10,
-        color: colors.text
-    },
-    backButtonWrapper: {
-        height: 40,
-        width: 40,
-        backgroundColor: colors.sunflower,
-        borderRadius: 20,
-        justifyContent: "center",
-        alignItems: "center",
-        marginBottom: 10
-    },
-    logoutButton: {
-        backgroundColor: colors.softforest,
-        borderRadius: 20,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        alignItems: 'center',
-    },
-  
-    logoutText: {
-        color: colors.white,
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
+  container: {
+    flex: 1,
+    backgroundColor: colors.white,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: colors.primary,
+    paddingVertical: 15,
+    paddingHorizontal: 15,
+    elevation: 4,
+  },
+  backButton: {
+    padding: 8,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: colors.white,
+  },
+  editButton: {
+    padding: 8,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  contentContainer: {
+    paddingBottom: 30,
+  },
+  profileImageContainer: {
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: colors.white,
+  },
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  profileInitial: {
+    fontSize: 40,
+    fontWeight: 'bold',
+    color: colors.white,
+  },
+  profileName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: colors.text,
+    marginBottom: 5,
+  },
+  sellerTag: {
+    backgroundColor: colors.jade,
+    paddingHorizontal: 15,
+    paddingVertical: 5,
+    borderRadius: 15,
+    color: colors.white,
+    fontWeight: '600',
+  },
+  infoSection: {
+    backgroundColor: colors.white,
+    marginHorizontal: 15,
+    marginVertical: 10,
+    borderRadius: 10,
+    padding: 15,
+    elevation: 2,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colors.text,
+    marginBottom: 15,
+  },
+  infoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.lightGray,
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.lighterGray,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
+  },
+  infoContent: {
+    flex: 1,
+  },
+  infoLabel: {
+    fontSize: 14,
+    color: colors.secondaryText,
+  },
+  infoValue: {
+    fontSize: 16,
+    color: colors.text,
+    fontWeight: '500',
+  },
+  actionsSection: {
+    backgroundColor: colors.white,
+    marginHorizontal: 15,
+    marginVertical: 10,
+    borderRadius: 10,
+    overflow: 'hidden',
+    elevation: 2,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.lightGray,
+  },
+  actionText: {
+    flex: 1,
+    marginLeft: 15,
+    fontSize: 16,
+    color: colors.text,
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    backgroundColor: colors.error,
+    marginHorizontal: 15,
+    marginVertical: 20,
+    paddingVertical: 15,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 2,
+    marginBottom: 80,
+  },
+  logoutButtonText: {
+    color: colors.white,
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginLeft: 10,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+  },
+  loadingText: {
+    marginTop: 15,
+    color: colors.text,
+    fontSize: 16,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    padding: 20,
+  },
+  errorText: {
+    marginTop: 15,
+    color: colors.error,
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 5,
+  },
+  retryButtonText: {
+    color: colors.white,
+    fontWeight: 'bold',
+  },
 });
 
 export default SellerProfileScreen;

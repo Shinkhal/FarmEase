@@ -45,7 +45,7 @@ const SignupScreen = () => {
     }
   
     try {
-      const response = await fetch('http://13.200.59.120:5000/api/auth/register', { // Ensure the endpoint matches your backend route
+      const response = await fetch('http://localhost:5000/api/auth/register', { // Ensure the endpoint matches your backend route
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

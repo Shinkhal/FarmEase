@@ -74,7 +74,7 @@ const BuyerHomeScreen = () => {
 
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('http://10.35.138.29:5000/products');
+        const response = await axios.get('http://192.168.29.146:5000/products');
         setProducts(response.data);
         setLoading(false);
       } catch (error) {
