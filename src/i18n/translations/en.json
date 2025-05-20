@@ -1,0 +1,18 @@
+{
+    "welcome": "Welcome to Farm Ease",
+    "login": "Login",
+    "signup": "Sign up",
+    "emailPlaceholder": "Enter your email",
+    "passwordPlaceholder": "Enter your password",
+    "NamePlaceholder":"Enter your name",
+    "continue": "or continue with",
+    "forgotPassword": "Forgot Password?",
+    "google": "Google",
+    "phonePlaceholder":"Enter your phone Number",
+    "subtitle" : "Empowering Farmers with Direct Connections and Intelligent Insights",
+    "otpPlaceholder":"Enter the otp recived on your phone no.",
+    "greeting": "Let's get Started ",
+    "roles":"select your role",
+    "greetinglogin":"Welcome Back"
+  }
+  

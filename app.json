@@ -6,22 +6,59 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "jsEngine": "hermes",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses the camera to take photos of products.",
+        "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to upload product images."
+      }
     },
     "android": {
+      "permissions": [
+        "INTERNET",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "notification": {
+        "icon": "./assets/notification-icon.png",
+        "color": "#ffffff",
+        "channelId": "default"
+      },
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": {
+            "scheme": "farmease",
+            "host": "pay"
+          },
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-font",
+      "expo-notifications"
+    ],
+    "extra": {
+      "razorpayApiKey": "YOUR_RAZORPAY_API_KEY",
+      "backendApiUrl": "https://api.yourbackend.com"
     }
   }
 }
