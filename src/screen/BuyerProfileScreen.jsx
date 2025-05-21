@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet, Alert, TouchableOpacity, ScrollView } from 'react-native';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  Alert, 
+  TouchableOpacity, 
+  ScrollView, 
+  ActivityIndicator,
+  Image,
+  StatusBar 
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -20,7 +30,6 @@ const BuyerProfileScreen = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-
   const handleGoBack = () => {
     navigation.goBack();
   };
@@ -28,17 +37,15 @@ const BuyerProfileScreen = () => {
   // Function to fetch profile data from API
   const fetchProfileData = async (email) => {
     try {
-      // Replace with your actual API URL and pass email in the query params or request body
-      const response = await fetch(`http://13.200.59.120:5000/api/auth/profile/${email}`,{
+      const response = await fetch(`http://192.168.29.146:5000/api/auth/profile/${email}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
         }
-    }); 
+      });
 
       const data = await response.json();
       
-      // Assuming the API response is structured like { name: 'John Doe', email: 'john@example.com', phone: '1234567890' }
       setProfileData({
         name: data.name,
         email: data.email,
@@ -89,13 +96,14 @@ const BuyerProfileScreen = () => {
               // Clear user data
               await AsyncStorage.multiRemove(['userToken', 'userEmail', 'userRole']);
               
-              // Navigate to the LOGIN screen only after data is removed
+              // Navigate to the HOME screen
               navigation.reset({
                 index: 0,
                 routes: [{ name: 'HOME' }],
               });
             } catch (error) {
               console.log("Error logging out: ", error);
+              Alert.alert("Error", "Could not log out. Please try again.");
             }
           },
         },
@@ -103,115 +111,340 @@ const BuyerProfileScreen = () => {
     );
   };
   
+  // Generate initials for avatar
+  const getInitials = (name) => {
+    if (!name) return '?';
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
 
   if (loading) {
-    return <Text>Loading...</Text>;
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={styles.loadingText}>Loading profile...</Text>
+      </View>
+    );
   }
 
   if (error) {
-    return <Text>{error}</Text>;
+    return (
+      <View style={styles.errorContainer}>
+        <Ionicons name="alert-circle-outline" size={50} color={colors.primary} />
+        <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity 
+          style={styles.retryButton}
+          onPress={() => {
+            setLoading(true);
+            getEmailAndFetchProfile();
+          }}
+        >
+          <Text style={styles.retryButtonText}>Retry</Text>
+        </TouchableOpacity>
+      </View>
+    );
   }
 
   return (
     <View style={styles.container}>
-        <ScrollView style={styles.content}>
-            <TouchableOpacity style={styles.backButtonWrapper} onPress={handleGoBack}>
-                <Ionicons name={"arrow-back-outline"} color={colors.primary} size={25} />
-            </TouchableOpacity>
-            <Text style={styles.header}>Buyer Profile</Text>
-            <View style={styles.profileBox}>
-                <Text style={styles.label}>Name:</Text>
-                <Text style={styles.value}>{profileData.name}</Text>
-
-                <Text style={styles.label}>Email:</Text>
-                <Text style={styles.value}>{profileData.email}</Text>
-
-                <Text style={styles.label}>Phone Number:</Text>
-                <Text style={styles.value}>{profileData.phone}</Text>
-            </View>
-            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                <Text style={styles.logoutText}>Logout</Text>
-            </TouchableOpacity>
-        </ScrollView>
-        <View style={styles.footer}>
-        <Footer />
+      <StatusBar backgroundColor={colors.jade} barStyle="light-content" />
+      
+      {/* Header */}
+      <View style={styles.headerContainer}>
+        <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
+          <Ionicons name="arrow-back" color={colors.white} size={24} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>My Profile</Text>
+        <View style={styles.placeholderView} />
       </View>
+
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Profile Avatar */}
+        <View style={styles.avatarSection}>
+          <View style={styles.avatarContainer}>
+            <Text style={styles.avatarText}>{getInitials(profileData.name)}</Text>
+          </View>
+          <Text style={styles.profileName}>{profileData.name}</Text>
+        </View>
+
+        {/* Profile Details */}
+        <View style={styles.profileDetailsContainer}>
+          <Text style={styles.sectionTitle}>Account Information</Text>
+          
+          <View style={styles.infoCard}>
+            <View style={styles.infoItem}>
+              <Ionicons name="person-outline" size={22} color={colors.primary} />
+              <View style={styles.infoContent}>
+                <Text style={styles.infoLabel}>Full Name</Text>
+                <Text style={styles.infoValue}>{profileData.name}</Text>
+              </View>
+            </View>
+            
+            <View style={styles.divider} />
+            
+            <View style={styles.infoItem}>
+              <Ionicons name="mail-outline" size={22} color={colors.primary} />
+              <View style={styles.infoContent}>
+                <Text style={styles.infoLabel}>Email Address</Text>
+                <Text style={styles.infoValue}>{profileData.email}</Text>
+              </View>
+            </View>
+            
+            <View style={styles.divider} />
+            
+            <View style={styles.infoItem}>
+              <Ionicons name="call-outline" size={22} color={colors.primary} />
+              <View style={styles.infoContent}>
+                <Text style={styles.infoLabel}>Phone Number</Text>
+                <Text style={styles.infoValue}>{profileData.phone}</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Actions Section */}
+        <View style={styles.actionsContainer}>
+          <Text style={styles.sectionTitle}>Actions</Text>
+          
+          <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('EditProfile', { profileData })}>
+            <Ionicons name="create-outline" size={22} color={colors.primary} />
+            <Text style={styles.actionButtonText}>Edit Profile</Text>
+            <Ionicons name="chevron-forward" size={22} color={colors.gray} />
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('OrderHistory')}>
+            <Ionicons name="list-outline" size={22} color={colors.primary} />
+            <Text style={styles.actionButtonText}>Order History</Text>
+            <Ionicons name="chevron-forward" size={22} color={colors.gray} />
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('Favorites')}>
+            <Ionicons name="heart-outline" size={22} color={colors.primary} />
+            <Text style={styles.actionButtonText}>Saved Items</Text>
+            <Ionicons name="chevron-forward" size={22} color={colors.gray} />
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Ionicons name="log-out-outline" size={22} color={colors.white} />
+            <Text style={styles.logoutText}>Logout</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+
+        <Footer />
+      
     </View>
-);
+  );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.jade,
-        padding: 20,
-        marginTop: 20
+  container: {
+    flex: 1,
+    backgroundColor: colors.greentea,
+    padding: 15,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: colors.text,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    padding: 20,
+  },
+  errorText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: colors.text,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: colors.white,
+    fontWeight: 'bold',
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: colors.jade,
+    paddingTop: 10,
+    paddingBottom: 15,
+    paddingHorizontal: 16,
+    elevation: 4,
+  },
+  backButton: {
+    padding: 8,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: colors.white,
+  },
+  placeholderView: {
+    width: 40,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  avatarSection: {
+    alignItems: 'center',
+    paddingVertical: 24,
+    backgroundColor: colors.jade,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
     },
-    content: {
-        padding: 20,
-        backgroundColor: colors.gray,
-        borderRadius: 10,
-        shadowColor: colors.jade,
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  avatarContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: colors.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
     },
-    header: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
-        color: colors.primary
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  avatarText: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: colors.primary,
+  },
+  profileName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: colors.white,
+  },
+  profileDetailsContainer: {
+    paddingHorizontal: 16,
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colors.text,
+    marginBottom: 12,
+  },
+  infoCard: {
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
     },
-    profileBox: {
-        backgroundColor: colors.white, // Background color for the box
-        borderRadius: 10, // Rounded corners
-        padding: 15, // Padding inside the box
-        marginBottom: 20, // Space below the box
-        shadowColor: '#000', // Shadow color
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.3, // Shadow opacity
-        shadowRadius: 4, // Shadow blur radius
-        elevation: 5, // For Android shadow effect
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  infoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  infoContent: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  infoLabel: {
+    fontSize: 14,
+    color: colors.gray,
+    marginBottom: 4,
+  },
+  infoValue: {
+    fontSize: 16,
+    color: colors.text,
+    fontWeight: '500',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#f0f0f0',
+    marginVertical: 4,
+  },
+  actionsContainer: {
+    paddingHorizontal: 16,
+    marginBottom: 24,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
     },
-    label: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: colors.softforest
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  actionButtonText: {
+    flex: 1,
+    fontSize: 16,
+    color: colors.text,
+    marginLeft: 12,
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary,
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
     },
-    value: {
-        fontSize: 16,
-        marginBottom: 10,
-        color: colors.text
-    },
-    backButtonWrapper: {
-        height: 40,
-        width: 40,
-        backgroundColor: colors.sunflower,
-        borderRadius: 20,
-        justifyContent: "center",
-        alignItems: "center",
-        marginBottom: 10
-    },
-    logoutButton: {
-        backgroundColor: colors.softforest,
-        borderRadius: 20,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        alignItems: 'center',
-    },
-  
-    logoutText: {
-        color: colors.white,
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  logoutText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.white,
+    marginLeft: 8,
+  },
 });
 
 export default BuyerProfileScreen;

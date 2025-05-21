@@ -16,6 +16,7 @@ import BuyerProfileScreen from './src/screen/BuyerProfileScreen';
 import SellerProfileScreen from './src/screen/SellerProfileScreen';
 import FarmerListingScreen from './src/screen/AddProductScreen';
 import ProductDetailsScreen from './src/screen/DetailedProductScreen';
+import CartScreen from './src/screen/CartScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -45,6 +46,7 @@ const App = () => {
         <Stack.Screen name="ADDPRODUCT" component={FarmerListingScreen} />
         <Stack.Screen name="SELLERORDERS" component={SellerOrdersScreen} />
         <Stack.Screen name='ProductDetails' component={ProductDetailsScreen}/>
+        <Stack.Screen name='Cart' component={CartScreen}/>
         
         {/* Buyer Screens */}
         {/* <Stack.Screen name="ProductScreen" component={ProductScreen} /> */}

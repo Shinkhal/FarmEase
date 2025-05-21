@@ -95,14 +95,14 @@ const Footer = () => {
 
 const styles = StyleSheet.create({
   footerContainer: {
-    position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
     backgroundColor: 'transparent',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingBottom: 8,
+    padding: 5,
+    height: 70,
   },
   footer: {
     flexDirection: 'row',
